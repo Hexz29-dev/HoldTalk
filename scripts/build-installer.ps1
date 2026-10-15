@@ -27,11 +27,10 @@ $VcRuntimePath = (Resolve-Path -LiteralPath $VcRuntimePath).Path
 $prepared = Join-Path $root 'dist\Holdtalk'
 foreach ($relative in @(
     'tools\ffmpeg\bin\ffmpeg.exe',
-    'tools\transcribe-vulkan\transcribe.dll',
-    'models\cohere-transcribe-03-2026-Q4_K_M.gguf'
+    'tools\transcribe-vulkan\transcribe.dll'
 )) {
     if (-not (Test-Path -LiteralPath (Join-Path $prepared $relative) -PathType Leaf)) {
-        throw "Missing $relative. Run scripts\setup.ps1 -SelfContained first."
+        throw "Missing $relative. Run scripts\setup.ps1 -SelfContained -SkipModel first."
     }
 }
 

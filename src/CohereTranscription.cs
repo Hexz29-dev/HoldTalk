@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Json;
@@ -28,7 +29,20 @@ internal static class CohereTranscription
                 try
                 {
                     var request = JsonSerializer.Deserialize<SpeechRequest>(line) ?? throw new InvalidDataException("Missing transcription request.");
-                    response = new(Transcribe(session, ReadAudio(request.Wav), request.Language), null);
+                    var read = Stopwatch.StartNew();
+                    float[] pcm = ReadAudio(request.Wav);
+                    bool noAudio = !pcm.Any(sample => sample != 0);
+                    double readMs = read.Elapsed.TotalMilliseconds;
+                    if (noAudio) response = new("", null, NoAudio: true);
+                    else
+                    {
+                        string text = Transcribe(session, pcm, request.Language);
+                        transcribe_timings_init(out var timings);
+                        if (timings.StructSize != (ulong)Marshal.SizeOf<NativeTimings>())
+                            throw new InvalidDataException("Unexpected transcribe.cpp timing layout.");
+                        Check(transcribe_get_timings(session, ref timings));
+                        response = new(text, null, Timings: new(readMs, timings.MelMs, timings.EncodeMs, timings.DecodeMs));
+                    }
                 }
                 catch (Exception exception) { response = new("", exception.Message); }
                 await ReplyAsync(response);
@@ -91,8 +105,11 @@ internal static class CohereTranscription
             {
                 if (!validFormat || size % 2 != 0 || size > 16000 * 400 * 2)
                     throw new InvalidDataException("Recording must be mono 16 kHz 16-bit PCM, at most 400 seconds.");
-                var pcm = new float[size / 2];
-                for (int i = 0; i < pcm.Length; i++) pcm[i] = reader.ReadInt16() / 32768f;
+                byte[] bytes = reader.ReadBytes((int)size);
+                if (bytes.Length != size) throw new InvalidDataException("Incomplete WAV audio data.");
+                var samples = MemoryMarshal.Cast<byte, short>(bytes);
+                var pcm = new float[samples.Length];
+                for (int i = 0; i < pcm.Length; i++) pcm[i] = samples[i] / 32768f;
                 return pcm;
             }
             stream.Position = next;
@@ -120,6 +137,13 @@ internal static class CohereTranscription
         public IntPtr Prompt, Prefix;
     }
 
+    [StructLayout(LayoutKind.Sequential)]
+    private struct NativeTimings
+    {
+        public ulong StructSize;
+        public float LoadMs, MelMs, EncodeMs, DecodeMs;
+    }
+
     [DllImport("transcribe", CallingConvention = CallingConvention.Cdecl)] private static extern IntPtr transcribe_version();
     [DllImport("transcribe", CallingConvention = CallingConvention.Cdecl)] private static extern int transcribe_init_backends_default();
     [DllImport("transcribe", CallingConvention = CallingConvention.Cdecl)] private static extern int transcribe_open([MarshalAs(UnmanagedType.LPUTF8Str)] string path, IntPtr loadParameters, IntPtr sessionParameters, out IntPtr session);
@@ -130,7 +154,10 @@ internal static class CohereTranscription
     [DllImport("transcribe", CallingConvention = CallingConvention.Cdecl)] private static extern IntPtr transcribe_status_string(int status);
     [DllImport("transcribe", CallingConvention = CallingConvention.Cdecl)] private static extern IntPtr transcribe_get_model(IntPtr session);
     [DllImport("transcribe", CallingConvention = CallingConvention.Cdecl)] private static extern IntPtr transcribe_model_backend(IntPtr model);
+    [DllImport("transcribe", CallingConvention = CallingConvention.Cdecl)] private static extern void transcribe_timings_init(out NativeTimings timings);
+    [DllImport("transcribe", CallingConvention = CallingConvention.Cdecl)] private static extern int transcribe_get_timings(IntPtr session, ref NativeTimings timings);
 }
 
 internal sealed record SpeechRequest(string Wav, string Language);
-internal sealed record SpeechResponse(string Text, string? Error);
+internal sealed record SpeechResponse(string Text, string? Error, bool NoAudio = false, TranscriptionTimings? Timings = null);
+public sealed record TranscriptionTimings(double ReadMs, float MelMs, float EncodeMs, float DecodeMs);

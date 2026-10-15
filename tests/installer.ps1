@@ -34,9 +34,8 @@ try {
         Check (Test-Path -LiteralPath (Join-Path $target $relative)) "Payload contains $relative"
     }
     $model = Join-Path $target 'models\cohere-transcribe-03-2026-Q4_K_M.gguf'
-    Check ((Get-FileHash -LiteralPath $model -Algorithm SHA256).Hash -eq
-        '0ea56826d8bd5d74b7143a4a04e022dc1bb75452cfae49d98b6acb0c1d16a1fb') 'Installed model matches pinned SHA256'
-    Check ((Get-ChildItem -LiteralPath (Join-Path $target 'models') -File).Count -eq 1) 'Only the default model is packaged'
+    Check (-not (Test-Path -LiteralPath (Join-Path $target 'models'))) 'Voice model is not packaged or downloaded during installation'
+    Check ((Get-Item -LiteralPath $InstallerPath).Length -lt 500MB) 'Installer excludes the 1.56 GB model'
     $configPath = Join-Path $target 'config.json'
     Check ((Get-Content -LiteralPath $configPath -Raw) -eq
         (Get-Content -LiteralPath (Join-Path $root 'config.example.json') -Raw)) 'Fresh install uses default settings'
@@ -52,9 +51,13 @@ try {
     Set-Content -LiteralPath $envPath -Value '# installer test; no credentials'
     $configHash = (Get-FileHash -LiteralPath $configPath).Hash
     $envHash = (Get-FileHash -LiteralPath $envPath).Hash
+    New-Item -ItemType Directory -Path (Split-Path -Parent $model) -Force | Out-Null
+    Set-Content -LiteralPath $model -Value 'stand-in for a separately downloaded model'
+    $modelHash = (Get-FileHash -LiteralPath $model).Hash
     Install 'installer-update.log'
     Check ((Get-FileHash -LiteralPath $configPath).Hash -eq $configHash) 'Update preserves settings'
     Check ((Get-FileHash -LiteralPath $envPath).Hash -eq $envHash) 'Update preserves .env'
+    Check ((Get-FileHash -LiteralPath $model).Hash -eq $modelHash) 'Update preserves separately downloaded model'
 }
 finally {
     if (Test-Path -LiteralPath $uninstaller) {
@@ -63,7 +66,7 @@ finally {
         Check (-not (Test-Path -LiteralPath $registration)) 'Uninstall removes Windows registration'
         Check (-not (Test-Path -LiteralPath $shortcut)) 'Uninstall removes Start menu shortcut'
         Check (-not (Test-Path -LiteralPath (Join-Path $target 'Holdtalk.exe'))) 'Uninstall removes application binaries'
-        Check (-not (Test-Path -LiteralPath (Join-Path $target 'models'))) 'Uninstall removes bundled model'
+        Check ((Get-FileHash -LiteralPath $model).Hash -eq $modelHash) 'Uninstall preserves separately downloaded model'
         Check (Test-Path -LiteralPath (Join-Path $target 'config.json')) 'Uninstall preserves settings'
         Check (Test-Path -LiteralPath (Join-Path $target '.env')) 'Uninstall preserves .env'
     }

@@ -45,7 +45,6 @@ Source: "{#PreparedDir}\tools\ffmpeg\LICENSE"; DestDir: "{app}\tools\ffmpeg"; Fl
 Source: "{#PreparedDir}\tools\ffmpeg\README.txt"; DestDir: "{app}\tools\ffmpeg"; Flags: ignoreversion
 Source: "{#PreparedDir}\tools\transcribe-vulkan\*.dll"; DestDir: "{app}\tools\transcribe-vulkan"; Flags: ignoreversion
 Source: "{#PreparedDir}\tools\transcribe-vulkan\licenses\*"; DestDir: "{app}\tools\transcribe-vulkan\licenses"; Flags: ignoreversion recursesubdirs
-Source: "{#PreparedDir}\models\cohere-transcribe-03-2026-Q4_K_M.gguf"; DestDir: "{app}\models"; Hash: "0ea56826d8bd5d74b7143a4a04e022dc1bb75452cfae49d98b6acb0c1d16a1fb"; Flags: ignoreversion nocompression
 
 [Icons]
 Name: "{group}\HoldTalk"; Filename: "{app}\Holdtalk.exe"; WorkingDir: "{app}"

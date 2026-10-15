@@ -21,7 +21,15 @@ internal static class Program
         try
         {
             string directory = Settings.FindAppDirectory(AppContext.BaseDirectory);
-            using var app = new TrayApp(Settings.Load(directory), directory);
+            var settings = Settings.Load(directory);
+            string model = Settings.ResolvePath(directory, settings.ModelPath);
+            if (!File.Exists(model) && Path.GetFullPath(model).Equals(
+                Path.GetFullPath(Settings.ResolvePath(directory, new Settings().ModelPath)), StringComparison.OrdinalIgnoreCase))
+            {
+                using var download = new ModelDownloadDialog(model);
+                if (download.ShowDialog() != DialogResult.OK) return 0;
+            }
+            using var app = new TrayApp(settings, directory);
             Application.Run(app);
         }
         catch (Exception exception)

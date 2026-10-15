@@ -7,9 +7,11 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <AssemblyName>Holdtalk</AssemblyName>
+    <Version>1.0.1</Version>
     <ApplicationIcon>Assets/HoldTalk.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
+    <InternalsVisibleTo Include="Holdtalk.Tests" />
     <Using Include="System.IO" />
     <Using Include="System.Net.Http" />
     <Resource Include="Assets/HoldTalk.ico" />

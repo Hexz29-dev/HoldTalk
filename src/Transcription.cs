@@ -13,7 +13,8 @@ public sealed class ChildProcess : IDisposable
     private readonly Task<string> output;
     private readonly Task<string> error;
 
-    public ChildProcess(string executable, IEnumerable<string> arguments, bool input = false, bool streamOutput = false)
+    public ChildProcess(string executable, IEnumerable<string> arguments, bool input = false, bool streamOutput = false,
+        IReadOnlyDictionary<string, string>? environment = null)
     {
         var start = new ProcessStartInfo(executable)
         {
@@ -22,6 +23,8 @@ public sealed class ChildProcess : IDisposable
             StandardOutputEncoding = Encoding.UTF8, StandardErrorEncoding = Encoding.UTF8
         };
         foreach (string argument in arguments) start.ArgumentList.Add(argument);
+        if (environment is not null)
+            foreach (var (name, value) in environment) start.Environment[name] = value;
         Process = Process.Start(start) ?? throw new IOException($"Could not start {executable}.");
         output = streamOutput ? Task.FromResult("") : Process.StandardOutput.ReadToEndAsync();
         error = Process.StandardError.ReadToEndAsync();
@@ -58,6 +61,7 @@ public sealed class SpeechEngine(Settings settings, string directory) : IDisposa
     private ChildProcess? worker;
     private readonly SemaphoreSlim workerLock = new(1);
     public string Backend { get; private set; } = "";
+    public TranscriptionTimings? LastTimings { get; private set; }
     public string Ffmpeg => Settings.ResolvePath(directory, settings.FfmpegPath);
     public string TranscribeLibrary => Settings.ResolvePath(directory, settings.TranscribeLibraryPath);
     public string Model => Settings.ResolvePath(directory, settings.ModelPath);
@@ -84,18 +88,22 @@ public sealed class SpeechEngine(Settings settings, string directory) : IDisposa
 
     public async Task<string> TranscribeAsync(string wav, CancellationToken cancellation = default)
     {
-        if (!await HasAudioAsync(wav, cancellation))
-            throw new InvalidOperationException("No audio signal detected. Check the selected microphone, mute button and Windows microphone level.");
         await workerLock.WaitAsync(cancellation);
+        SpeechResponse response;
         try
         {
+            LastTimings = null;
             await PrepareWorkerAsync(cancellation);
             await worker!.Process.StandardInput.WriteLineAsync(JsonSerializer.Serialize(new SpeechRequest(wav, settings.Language)).AsMemory(), cancellation);
             await worker.Process.StandardInput.FlushAsync(cancellation);
-            return Normalize((await ReadResponseAsync(cancellation)).Text);
+            response = await ReadResponseAsync(cancellation);
+            LastTimings = response.Timings;
         }
         catch { Dispose(); throw; }
         finally { workerLock.Release(); }
+        if (response.NoAudio)
+            throw new InvalidOperationException("No audio signal detected. Check the selected microphone, mute button and Windows microphone level.");
+        return Normalize(response.Text);
     }
 
     public async Task PrepareAsync(CancellationToken cancellation = default)
@@ -111,8 +119,10 @@ public sealed class SpeechEngine(Settings settings, string directory) : IDisposa
         if (worker is not null && !worker.Process.HasExited) return;
         Dispose();
         CheckFiles();
+        // Native getenv needs this at process startup; avoid mapped VRAM stalls on discrete GPUs (UMA is unaffected).
         worker = new ChildProcess(Path.Combine(directory, "Holdtalk.exe"),
-            ["--speech-worker", TranscribeLibrary, Model], input: true, streamOutput: true);
+            ["--speech-worker", TranscribeLibrary, Model], input: true, streamOutput: true,
+            environment: new Dictionary<string, string> { ["GGML_VK_DISABLE_HOST_VISIBLE_VIDMEM"] = "1" });
         Backend = (await ReadResponseAsync(cancellation)).Text;
     }
 
@@ -141,7 +151,7 @@ public sealed class SpeechEngine(Settings settings, string directory) : IDisposa
         return Task.FromResult(CohereTranscription.ReadAudio(wav).Any(sample => sample != 0));
     }
 
-    public void Dispose() { worker?.Dispose(); worker = null; Backend = ""; }
+    public void Dispose() { worker?.Dispose(); worker = null; Backend = ""; LastTimings = null; }
 
     public static string Normalize(string text) => Regex.Replace(text, @"\s+", " ").Trim();
 }

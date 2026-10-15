@@ -42,21 +42,28 @@ The icon may initially be inside Windows' hidden tray icons; pin it if desired.
 
 ## Windows installer
 
-The offline installer is generated in `dist\installer\HoldTalk-Setup-<version>-x64.exe`.
-It includes .NET, the Visual C++ runtime, FFmpeg, the Cohere runtime and the default Q4_K_M voice model.
+The installer is generated in `dist\installer\HoldTalk-Setup-<version>-x64.exe`.
+It includes .NET, the Visual C++ runtime, FFmpeg and the Cohere runtime, without the voice model.
 Run it on Windows 10 (build 19041 or later) / Windows 11 x64; no administrator
-account, .NET installation or internet connection is needed. The installer opens
+account or .NET installation is needed. The installer opens
 in Portuguese on Brazilian Windows and also supports English.
+
+After installation finishes, leave **Launch HoldTalk** selected to open the app.
+If the default model is missing, HoldTalk asks whether to download it (1.56 GB),
+with progress and cancellation. You can decline and reopen HoldTalk later to retry.
+Internet is required for this download; dictation works offline afterward.
+The pinned revision and SHA256 are verified before the model is used. Existing
+models and custom `modelPath` settings are left untouched.
 
 HoldTalk installs to `%LOCALAPPDATA%\Programs\HoldTalk`, with a Start menu shortcut
 and an optional desktop shortcut. Quit HoldTalk from its tray menu before
 installing, updating or uninstalling. Uninstall it through Windows Settings.
-Updates preserve `config.json` and `.env`; uninstall also preserves those files
+Updates preserve `config.json`, `.env` and downloaded models; uninstall also preserves those files
 and the transcript archive in `%USERPROFILE%\Dictation`. The installer ships
 default settings and never packages your local configuration or API keys.
 The build is unsigned and may trigger a Windows SmartScreen warning.
 
-To generate the installer, prepare the dependencies below, install
+To generate the installer, prepare the dependencies below with `-SelfContained -SkipModel`, install
 [Inno Setup 6](https://jrsoftware.org/isdl.php) and the Visual Studio C++ x64
 build tools (for the redistributable CRT files), then run:
 
@@ -69,9 +76,8 @@ powershell -NoProfile -File .\scripts\build-installer.ps1
 ```
 
 Compilation uses a separate `dist\installer-app` folder, so the portable app
-can remain running. Only the default model and current runtime are packaged;
-additional local models and old Whisper dependencies are excluded. The model's
-pinned SHA256 is checked by the installer compiler.
+can remain running. Only the current runtime is packaged;
+local models and old Whisper dependencies are excluded.
 The Visual C++ DLLs are deployed beside the app, following Microsoft's
 [local deployment guidance](https://learn.microsoft.com/en-us/cpp/windows/deployment-in-visual-cpp?view=msvc-170).
 Keep these redistributable files updated when rebuilding the installer.
@@ -126,6 +132,10 @@ loaded model. Startup takes a few seconds; subsequent dictations skip loading.
 The worker keeps model weights and GPU buffers resident until you quit.
 Vulkan automatically selects a compatible GPU and falls back to CPU when no
 GPU is available. A working graphics driver is required for GPU inference.
+The worker requests device-local Vulkan memory without preferring host-visible
+VRAM (`GGML_VK_DISABLE_HOST_VISIBLE_VIDMEM=1`, set before the worker starts).
+This avoids a measured Radeon slowdown on larger encoder graphs; Vulkan's
+integrated-GPU/UMA memory policy and CPU fallback remain available.
 
 ## Microphone and accessibility permissions
 
@@ -281,7 +291,7 @@ With `jfk.wav` downloaded, compare CPU and Vulkan on the same Cohere model:
 
 ```powershell
 dotnet run --project .\tests\Holdtalk.Tests.csproj -c Release -- --benchmark "$PWD\dist\Holdtalk"
-# Measure end-to-end transcription latency using the configured language:
+# Measure WAV-to-text latency using the configured language:
 dotnet run --project .\tests\Holdtalk.Tests.csproj -c Release -- --latency "$PWD\dist\Holdtalk"
 ```
 
@@ -289,10 +299,18 @@ The speech check includes actual model recognition, silence rejection and
 microphone format/release checks. Inference runs in a persistent hidden child process;
 errors, truncated output and empty results fail rather than pasting incomplete
 text. Timeout, cancellation and quit kill native inference and its children. A failed
-worker reloads on the next request. Direct PCM reading avoids launching FFmpeg
-for silence checks and audio conversion.
+worker reloads on the next request. The worker reads and converts PCM in bulk
+once, rejects digital silence before inference, and stays warm after silence.
+`--latency` reports WAV reading, mel, encoder and decoder timings, the first
+request of each length, and median/sample p95 over five subsequent requests.
+These timings start with a finalized WAV; they exclude microphone shutdown,
+optional cleanup and clipboard delivery.
 
-On the RX 6650 XT, warmed Q4 tests of 5/10/15-second Portuguese clips took
-approximately 0.6/1.2/1.6 seconds. These are measured sample results, not a
-guarantee: Cohere does not consistently meet a one-second ceiling for 15-second
-dictations on this hardware. Optional F8 cloud cleanup adds its own latency.
+On 2026-10-15, RX 6650 XT Q4_K_M tests of synthetic Portuguese clips measured
+warm WAV-to-text medians of **202/270/325/453 ms** for **5/10/15/30 seconds**
+of audio (five runs per length). The controlled native comparison reduced
+10/15-second medians from approximately **1,074/1,522 ms to 267/325 ms**, with
+identical complete outputs on these fixtures. Short 5-second clips stayed
+around 190–200 ms. Results depend on hardware, drivers, audio and GPU load;
+these samples are not a latency guarantee or a broad speech-quality evaluation.
+Optional F8 cloud cleanup adds its own latency.

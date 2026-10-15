@@ -40,8 +40,9 @@ internal static class Program
             TestKeys();
             TestHistory(temp);
             TestCleanupAsync().GetAwaiter().GetResult();
+            TestModelDownloadAsync(temp).GetAwaiter().GetResult();
             TestProcessesAsync().GetAwaiter().GetResult();
-            if (args.Contains("--ui")) TestDashboard(args[^1]);
+            if (args.Contains("--ui")) { TestDashboard(args[^1]); TestModelDownloadDialog(temp, args[^1]); }
             if (args.Contains("--windows")) TestWindows();
             if (args.Contains("--speech")) TestSpeechAsync(args[^1]).GetAwaiter().GetResult();
             if (args.Contains("--benchmark")) TestBenchmarkAsync(args[^1]).GetAwaiter().GetResult();
@@ -144,8 +145,47 @@ internal static class Program
             Check(await client.CleanAsync(original) == (original, true), "offline cleanup falls back");
     }
 
+    private static async Task TestModelDownloadAsync(string temp)
+    {
+        string path = Path.Combine(temp, "models", "cohere.gguf");
+        var progress = new Progress<int>();
+        using (var client = new HttpClient(new FakeHandler((request, _) =>
+        {
+            Check(request.RequestUri?.AbsoluteUri == ModelDownloadDialog.ModelUrl, "model download uses the pinned HTTPS revision");
+            return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent("corrupted model") });
+        })))
+        {
+            try { await ModelDownloadDialog.DownloadAsync(client, path, progress, CancellationToken.None); throw new Exception("Corrupted model accepted"); }
+            catch (InvalidDataException) { Check(true, "model download rejects a mismatched SHA256"); }
+        }
+        Check(!File.Exists(path) && !File.Exists(path + ".part"), "corrupted model and partial download are removed");
+        File.WriteAllText(path, "existing model");
+        using (var client = new HttpClient(new FakeHandler((_, _) => Task.FromResult(new HttpResponseMessage(HttpStatusCode.ServiceUnavailable)))))
+        {
+            try { await ModelDownloadDialog.DownloadAsync(client, path, progress, CancellationToken.None); throw new Exception("HTTP failure ignored"); }
+            catch (HttpRequestException) { Check(true, "model download reports HTTP failure"); }
+        }
+        Check(File.ReadAllText(path) == "existing model", "failed download preserves an existing model");
+        using var cancellation = new CancellationTokenSource();
+        using (var client = new HttpClient(new FakeHandler((_, _) => Task.FromResult(
+            new HttpResponseMessage(HttpStatusCode.OK) { Content = new ByteArrayContent(new byte[200000]) }))))
+        {
+            try
+            {
+                await ModelDownloadDialog.DownloadAsync(client, path, new CallbackProgress(_ => cancellation.Cancel()), cancellation.Token);
+                throw new Exception("Cancellation ignored");
+            }
+            catch (OperationCanceledException) { Check(true, "model download supports cancellation while writing a partial file"); }
+        }
+        Check(!File.Exists(path + ".part") && File.ReadAllText(path) == "existing model", "cancelled download leaves no partial file and preserves existing models");
+    }
+
     private static async Task TestProcessesAsync()
     {
+        using (var process = new ChildProcess("cmd.exe", ["/d", "/c", "echo %HOLDTALK_TEST_ENV%"],
+            environment: new Dictionary<string, string> { ["HOLDTALK_TEST_ENV"] = "child-only" }))
+            Check((await process.FinishAsync(5)).Trim() == "child-only" && Environment.GetEnvironmentVariable("HOLDTALK_TEST_ENV") is null,
+                "native child environment is set at startup without changing the parent");
         using (var process = new ChildProcess("cmd.exe", ["/d", "/c", "echo ready"]))
             Check((await process.FinishAsync(5)).Contains("ready"), "child process output drained");
         using (var process = new ChildProcess("cmd.exe", ["/d", "/c", "exit 7"]))
@@ -270,6 +310,10 @@ internal static class Program
             try { await engine.TranscribeAsync(wav); throw new Exception("Silence was transcribed"); }
             catch (InvalidOperationException exception) when (exception.Message.StartsWith("No audio signal"))
             { Check(true, "silence cannot become a hallucinated transcript"); }
+            Check(engine.Backend != "", "silence rejection keeps the warmed worker resident");
+            File.Copy(sample, wav, overwrite: true);
+            Check(await engine.TranscribeAsync(wav) == result, "speech after silence reuses the worker without changing recognition");
+            Check(engine.LastTimings is { ReadMs: >= 0, MelMs: > 0, EncodeMs: > 0, DecodeMs: > 0 }, "native stage timings are available after recognition");
             string[] microphones = await engine.ListMicrophonesAsync();
             string microphone = string.IsNullOrWhiteSpace(settings.Microphone) ? WindowsMicrophone.DefaultName() : settings.Microphone;
             Check(microphones.Contains(microphone), "configured microphone matches real DirectShow input");
@@ -340,25 +384,30 @@ internal static class Program
         Console.WriteLine($"STARTUP: {startup.Elapsed.TotalMilliseconds:F0} ms; backend {engine.Backend}.");
         try
         {
-            var elapsed = new List<double>();
-            foreach (int seconds in new[] { 5, 10, 15 })
+            foreach (int seconds in new[] { 5, 10, 15, 30 })
             {
+                var elapsed = new List<double>();
+                string? firstText = null;
                 using (var clip = new ChildProcess(engine.Ffmpeg,
                     ["-hide_banner", "-loglevel", "error", "-y", "-stream_loop", "-1", "-i", sample, "-t", seconds.ToString(), "-ac", "1", "-ar", "16000", "-c:a", "pcm_s16le", wav]))
                     await clip.FinishAsync(10);
-                for (int run = 1; run <= 3; run++)
+                for (int run = 0; run <= 5; run++)
                 {
                     var timer = System.Diagnostics.Stopwatch.StartNew();
                     string text = await engine.TranscribeAsync(wav);
                     double milliseconds = timer.Elapsed.TotalMilliseconds;
-                    elapsed.Add(milliseconds);
+                    if (run > 0) elapsed.Add(milliseconds);
                     Check(!string.IsNullOrWhiteSpace(text), "warm Cohere returns a transcript");
-                    Console.WriteLine($"LATENCY {seconds}s run {run}: {milliseconds:F0} ms. {text}");
+                    firstText ??= text;
+                    Check(text == firstText, "repeated recognition preserves the complete transcript");
+                    var stages = engine.LastTimings ?? throw new Exception("Missing native stage timings.");
+                    Console.WriteLine($"LATENCY {seconds}s run {run}: {milliseconds:F1} ms (read {stages.ReadMs:F1}, mel {stages.MelMs:F1}, encode {stages.EncodeMs:F1}, decode {stages.DecodeMs:F1}). {text}");
                     if (settings.Language == "pt")
                         Check(text.Contains("relatório", StringComparison.OrdinalIgnoreCase), "Portuguese dictation retains the key phrase");
                 }
+                elapsed.Sort();
+                Console.WriteLine($"WARM {seconds}s: median {elapsed[elapsed.Count / 2]:F1} ms; sample p95 {elapsed[(int)Math.Ceiling(elapsed.Count * 0.95) - 1]:F1} ms (5 runs; excludes first use of this length).");
             }
-            Console.WriteLine($"WARM LATENCY: {elapsed.Min():F0}-{elapsed.Max():F0} ms; 1-second target met: {elapsed.Max() <= 1000}.");
         }
         finally { File.Delete(wav); }
     }
@@ -382,8 +431,12 @@ internal static class Program
         Check(!engine.HasAudioAsync(wav).GetAwaiter().GetResult(), "PCM parser skips padded ancillary chunks and rejects digital silence");
         WriteWave(1);
         Check(engine.HasAudioAsync(wav).GetAwaiter().GetResult(), "PCM parser preserves the quietest 16-bit signal");
+        Check(CohereTranscription.ReadAudio(wav).SequenceEqual([1 / 32768f]), "bulk PCM reader converts the quietest sample exactly");
         WriteWave(-32768);
         Check(engine.HasAudioAsync(wav).GetAwaiter().GetResult(), "PCM parser accepts negative full-scale samples");
+        Check(CohereTranscription.ReadAudio(wav).SequenceEqual([-1f]), "bulk PCM reader preserves negative full scale");
+        WriteWave(32767);
+        Check(CohereTranscription.ReadAudio(wav).SequenceEqual([32767 / 32768f]), "bulk PCM reader preserves positive full scale");
         WriteWave(1, 48000);
         Throws(() => engine.HasAudioAsync(wav).GetAwaiter().GetResult(), "unexpected recording sample rate rejected");
         WriteWave(1, truncated: true);
@@ -393,6 +446,25 @@ internal static class Program
     }
 
     private static HttpResponseMessage Json(string body) => new(HttpStatusCode.OK) { Content = new StringContent(body, Encoding.UTF8, "application/json") };
+    private sealed class CallbackProgress(Action<int> report) : IProgress<int>
+    {
+        public void Report(int value) => report(value);
+    }
+
+    private static void TestModelDownloadDialog(string temp, string outputDirectory)
+    {
+        string path = Path.Combine(temp, "declined-model.gguf");
+        using var dialog = new ModelDownloadDialog(path);
+        dialog.Shown += (_, _) =>
+        {
+            using var bitmap = new Bitmap(dialog.Width, dialog.Height);
+            dialog.DrawToBitmap(bitmap, dialog.ClientRectangle with { Width = dialog.Width, Height = dialog.Height });
+            bitmap.Save(Path.Combine(outputDirectory, "model-download.png"));
+            ((Button)dialog.CancelButton!).PerformClick();
+        };
+        Check(dialog.ShowDialog() == DialogResult.Cancel && !File.Exists(path), "model download can be declined without creating a model");
+    }
+
     private static void TestDashboard(string outputDirectory)
     {
         var settings = new Settings { Microphone = "Microphone (High Definition Audio Device)", Language = "pt", ModelPath = "models/cohere-transcribe-03-2026-Q4_K_M.gguf" };
