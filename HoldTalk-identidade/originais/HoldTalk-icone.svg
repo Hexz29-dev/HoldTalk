@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" fill="none" role="img" aria-labelledby="title desc">
+<title id="title">HoldTalk — ícone</title>
+<desc id="desc">Monograma H branco com uma onda sonora e pulso verde-menta em quadrado azul arredondado. Margens transparentes.</desc>
+<rect x="32" y="32" width="448" height="448" rx="112" fill="#315EFB"/>
+  <g fill="#FFFFFF">
+    <rect x="128" y="144" width="52" height="224" rx="26"/>
+    <rect x="260" y="144" width="52" height="224" rx="26"/>
+    <path d="M154 236 C179 236 182 216 207 216 C242 216 240 256 268 256 H286 V296 H268 C220 296 223 256 207 256 C190 256 187 276 154 276 Z"/>
+  </g>
+  <rect x="344" y="224" width="36" height="64" rx="18" fill="#ACFFD5"/>
+</svg>

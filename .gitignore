@@ -1,0 +1,34 @@
+**/bin/
+**/obj/
+**/node_modules/
+
+# Generated app, dependency downloads and test previews
+/dist/
+/tools/
+/models/
+/.downloads/
+/artifacts/
+
+# Local configuration and secrets
+.env*
+!.env.example
+config.json
+config.*.json
+!config.example.json
+config.json.tmp
+
+# Temporary audio and archives (keep the synthetic test fixture)
+*.wav
+!tests/fixtures/portuguese.wav
+*.zip
+*.part
+*.log
+
+# Editor and operating-system files
+.vs/
+.idea/
+*.user
+*.suo
+.DS_Store
+Thumbs.db
+Desktop.ini

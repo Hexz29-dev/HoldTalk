@@ -1,0 +1,30 @@
+HOLDTALK — VARIANTES DA IDENTIDADE
+
+ARQUIVOS
+originais/HoldTalk-logo.svg: cópia exata do logo recebido.
+originais/HoldTalk-icone.svg: cópia exata do ícone recebido.
+variantes/HoldTalk-logo-branco.svg: nome em #FFFFFF para superfícies escuras.
+variantes/HoldTalk-logo-marinho.svg: nome em #182341 para superfícies claras.
+variantes/HoldTalk-icone.svg: símbolo original, sem modificações.
+validacao/HoldTalk-verificacao.png: comparação dos logos e inspeção do ícone.
+
+PRESERVAÇÃO E VALIDAÇÃO
+Os arquivos recebidos não foram alterados. As cópias em originais são idênticas byte a byte.
+As letras recebidas já eram curvas vetoriais; suas coordenadas foram preservadas.
+A variante branca altera somente a cor do grupo do nome e a descrição acessível.
+O símbolo mantém sua geometria e as cores #315EFB, #ACFFD5 e #FFFFFF.
+Os SVGs têm fundo externo transparente, sem fontes, imagens incorporadas ou dependências externas.
+O quadrado azul arredondado é parte do símbolo original e permanece visível.
+
+ÍCONES
+Renderização e inspeção visual realizadas em 16, 24, 32 e 48 px.
+16 px: silhueta e H reconhecíveis; onda e pulso verde com definição reduzida.
+24 px: maior separação das hastes e do detalhe verde.
+32 e 48 px: leitura mais clara dos detalhes do símbolo.
+As ampliações de 3× na imagem usam pixels preservados, sem suavização adicional.
+Esta inspeção é dos SVGs rasterizados, não uma execução do aplicativo no Windows.
+
+IMPLEMENTAÇÃO DO APP
+O código-fonte do projeto Windows não estava disponível nesta entrega.
+A barra lateral, a tela inicial, o histórico, as configurações e os estados ainda não foram modificados.
+O layout em janelas menores e o funcionamento de ditado, atalhos e transcrição dependem do projeto para serem implementados e validados.

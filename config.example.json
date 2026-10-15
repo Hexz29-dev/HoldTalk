@@ -1,0 +1,12 @@
+{
+  "ffmpegPath": "tools/ffmpeg/bin/ffmpeg.exe",
+  "transcribeLibraryPath": "tools/transcribe-vulkan/transcribe.dll",
+  "modelPath": "models/cohere-transcribe-03-2026-Q4_K_M.gguf",
+  "microphone": "",
+  "dictationKey": "RControlKey",
+  "cleanupKey": "F8",
+  "language": "pt",
+  "maxRecordingSeconds": 300,
+  "transcriptionTimeoutSeconds": 300,
+  "clipboardRestoreDelayMs": 500
+}

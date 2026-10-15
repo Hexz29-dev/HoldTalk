@@ -1,0 +1,290 @@
+<Window x:Class="Holdtalk.Dashboard"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
+        Title="HoldTalk" Icon="Assets/HoldTalk.ico" Width="1040" Height="760" MinWidth="820" MinHeight="580"
+        WindowStartupLocation="CenterScreen" Background="#252C35" Foreground="#F3F4F5"
+        FontFamily="Segoe UI" FontSize="14" UseLayoutRounding="True" SnapsToDevicePixels="True">
+    <shell:WindowChrome.WindowChrome>
+        <shell:WindowChrome CaptionHeight="52" ResizeBorderThickness="6" CornerRadius="12" GlassFrameThickness="0" UseAeroCaptionButtons="False"/>
+    </shell:WindowChrome.WindowChrome>
+    <Window.Resources>
+        <ResourceDictionary>
+        <ResourceDictionary.MergedDictionaries><ResourceDictionary Source="Assets/MxIcons.xaml"/><ResourceDictionary Source="Assets/Brand.xaml"/></ResourceDictionary.MergedDictionaries>
+        <SolidColorBrush x:Key="Text" Color="#F3F4F5"/>
+        <SolidColorBrush x:Key="Muted" Color="#C4CBD5"/>
+        <SolidColorBrush x:Key="Accent" Color="#315EFB"/>
+        <SolidColorBrush x:Key="Focus" Color="#A7B8FF"/>
+        <SolidColorBrush x:Key="Ready" Color="#ACFFD5"/>
+        <SolidColorBrush x:Key="Glass" Color="#0BFFFFFF"/>
+        <SolidColorBrush x:Key="Edge" Color="#26FFFFFF"/>
+        <SolidColorBrush x:Key="FieldEdge" Color="#8A929B"/>
+        <Style x:Key="MxIcon" TargetType="ContentControl">
+            <Setter Property="Width" Value="20"/><Setter Property="Height" Value="20"/>
+            <Setter Property="Focusable" Value="False"/><Setter Property="IsHitTestVisible" Value="False"/>
+            <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="ContentControl">
+                <Viewbox><Canvas Width="24" Height="24"><Path Data="{TemplateBinding Content}" Stroke="{TemplateBinding Foreground}" StrokeThickness="1.5" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/></Canvas></Viewbox>
+            </ControlTemplate></Setter.Value></Setter>
+        </Style>
+        <Style x:Key="QuietText" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{StaticResource Muted}"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+            <Setter Property="LineHeight" Value="21"/>
+        </Style>
+        <Style x:Key="Panel" TargetType="Border">
+            <Setter Property="Background" Value="{StaticResource Glass}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource Edge}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="14"/>
+            <Setter Property="Padding" Value="22"/>
+        </Style>
+        <Style TargetType="Button">
+            <Setter Property="Background" Value="#0EFFFFFF"/>
+            <Setter Property="Foreground" Value="{StaticResource Text}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource FieldEdge}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="16,10"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="MinHeight" Value="40"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value><ControlTemplate TargetType="Button">
+                    <Border x:Name="Surface" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="8" Padding="{TemplateBinding Padding}">
+                        <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="Center"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Surface" Property="BorderBrush" Value="{StaticResource Focus}"/></Trigger>
+                        <Trigger Property="IsPressed" Value="True"><Setter TargetName="Surface" Property="Opacity" Value="0.75"/></Trigger>
+                        <Trigger Property="IsKeyboardFocused" Value="True"><Setter TargetName="Surface" Property="BorderBrush" Value="{StaticResource Focus}"/></Trigger>
+                        <Trigger Property="IsEnabled" Value="False"><Setter TargetName="Surface" Property="Opacity" Value="0.4"/></Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate></Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="Primary" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+            <Setter Property="Background" Value="{StaticResource Accent}"/>
+            <Setter Property="Foreground" Value="#FFFFFF"/>
+            <Setter Property="BorderBrush" Value="{StaticResource Accent}"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+        <Style x:Key="Caption" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+            <Setter Property="Background" Value="Transparent"/><Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Width" Value="44"/><Setter Property="Padding" Value="0"/>
+        </Style>
+        <Style x:Key="QuietButton" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+            <Setter Property="Background" Value="Transparent"/><Setter Property="BorderBrush" Value="{StaticResource Edge}"/>
+            <Setter Property="Padding" Value="12,7"/><Setter Property="MinHeight" Value="34"/>
+        </Style>
+        <Style x:Key="Nav" TargetType="RadioButton">
+            <Setter Property="Foreground" Value="{StaticResource Muted}"/><Setter Property="Margin" Value="0,3"/>
+            <Setter Property="Cursor" Value="Hand"/><Setter Property="MinHeight" Value="46"/>
+            <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="RadioButton">
+                <Border x:Name="Surface" Background="Transparent" CornerRadius="9" Padding="15,12" BorderThickness="1" BorderBrush="Transparent">
+                    <ContentPresenter VerticalAlignment="Center"/>
+                </Border>
+                <ControlTemplate.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Surface" Property="Background" Value="#18FFFFFF"/></Trigger>
+                    <Trigger Property="IsChecked" Value="True"><Setter TargetName="Surface" Property="Background" Value="#38315EFB"/><Setter TargetName="Surface" Property="BorderBrush" Value="#70A7B8FF"/><Setter Property="Foreground" Value="{StaticResource Text}"/></Trigger>
+                    <Trigger Property="IsKeyboardFocused" Value="True"><Setter TargetName="Surface" Property="BorderBrush" Value="{StaticResource Focus}"/></Trigger>
+                </ControlTemplate.Triggers>
+            </ControlTemplate></Setter.Value></Setter>
+        </Style>
+        <Style TargetType="TextBox">
+            <Setter Property="Background" Value="#292F36"/><Setter Property="Foreground" Value="{StaticResource Text}"/>
+            <Setter Property="CaretBrush" Value="{StaticResource Focus}"/><Setter Property="BorderBrush" Value="{StaticResource FieldEdge}"/>
+            <Setter Property="SelectionBrush" Value="#657FED"/>
+            <Setter Property="Padding" Value="12,10"/><Setter Property="MinHeight" Value="42"/>
+            <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="TextBox">
+                <Border x:Name="Field" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1" CornerRadius="8">
+                    <ScrollViewer x:Name="PART_ContentHost" Margin="{TemplateBinding Padding}" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden"/>
+                </Border>
+                <ControlTemplate.Triggers><Trigger Property="IsKeyboardFocusWithin" Value="True"><Setter TargetName="Field" Property="BorderBrush" Value="{StaticResource Focus}"/></Trigger><Trigger Property="IsEnabled" Value="False"><Setter Property="Opacity" Value="0.45"/></Trigger></ControlTemplate.Triggers>
+            </ControlTemplate></Setter.Value></Setter>
+        </Style>
+        <Style TargetType="ComboBox">
+            <Setter Property="Foreground" Value="{StaticResource Text}"/><Setter Property="Background" Value="#26303840"/>
+            <Setter Property="BorderBrush" Value="{StaticResource FieldEdge}"/>
+            <Setter Property="Padding" Value="12,8"/><Setter Property="MinHeight" Value="42"/><Setter Property="FontSize" Value="14"/>
+            <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="ComboBox">
+                <Grid>
+                    <ToggleButton Focusable="False" IsChecked="{Binding IsDropDownOpen, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}" ClickMode="Press">
+                        <ToggleButton.Template><ControlTemplate TargetType="ToggleButton"><Border x:Name="Field" Background="{Binding Background, RelativeSource={RelativeSource AncestorType=ComboBox}}" BorderBrush="{Binding BorderBrush, RelativeSource={RelativeSource AncestorType=ComboBox}}" BorderThickness="1" CornerRadius="8"><ContentControl Style="{StaticResource MxIcon}" Content="{StaticResource MxDropdown}" Foreground="{StaticResource Muted}" Width="16" Height="16" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,14,0"/></Border><ControlTemplate.Triggers><Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Field" Property="BorderBrush" Value="{StaticResource Focus}"/></Trigger></ControlTemplate.Triggers></ControlTemplate></ToggleButton.Template>
+                    </ToggleButton>
+                    <ContentPresenter Margin="12,8,35,8" VerticalAlignment="Center" IsHitTestVisible="False" Content="{TemplateBinding SelectionBoxItem}" ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}" ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}"/>
+                    <Popup x:Name="PART_Popup" Placement="Bottom" IsOpen="{TemplateBinding IsDropDownOpen}" AllowsTransparency="True" Focusable="False">
+                        <Border Background="#F6333C46" BorderBrush="{StaticResource FieldEdge}" BorderThickness="1" CornerRadius="8" Padding="5" MinWidth="{Binding ActualWidth, RelativeSource={RelativeSource TemplatedParent}}" Margin="0,5,0,0">
+                            <ScrollViewer MaxHeight="220" HorizontalScrollBarVisibility="Disabled"><ItemsPresenter KeyboardNavigation.DirectionalNavigation="Contained"/></ScrollViewer>
+                        </Border>
+                    </Popup>
+                </Grid>
+                <ControlTemplate.Triggers><Trigger Property="IsKeyboardFocusWithin" Value="True"><Setter Property="BorderBrush" Value="{StaticResource Focus}"/></Trigger><Trigger Property="IsEnabled" Value="False"><Setter Property="Opacity" Value="0.45"/></Trigger></ControlTemplate.Triggers>
+            </ControlTemplate></Setter.Value></Setter>
+        </Style>
+        <Style TargetType="ComboBoxItem">
+            <Setter Property="Foreground" Value="{StaticResource Text}"/><Setter Property="Padding" Value="10,9"/>
+            <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="ComboBoxItem"><Border x:Name="Item" Padding="{TemplateBinding Padding}" Background="Transparent" CornerRadius="5"><ContentPresenter/></Border><ControlTemplate.Triggers><Trigger Property="IsHighlighted" Value="True"><Setter TargetName="Item" Property="Background" Value="#25FFFFFF"/></Trigger><Trigger Property="IsSelected" Value="True"><Setter TargetName="Item" Property="Background" Value="#38315EFB"/></Trigger></ControlTemplate.Triggers></ControlTemplate></Setter.Value></Setter>
+        </Style>
+        <Style TargetType="ScrollBar">
+            <Setter Property="Width" Value="10"/><Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="ScrollBar">
+                <Track x:Name="PART_Track" IsDirectionReversed="True" Orientation="{TemplateBinding Orientation}" Minimum="{TemplateBinding Minimum}" Maximum="{TemplateBinding Maximum}" Value="{TemplateBinding Value}" ViewportSize="{TemplateBinding ViewportSize}">
+                    <Track.DecreaseRepeatButton><RepeatButton Command="ScrollBar.PageUpCommand" Focusable="False"><RepeatButton.Template><ControlTemplate TargetType="RepeatButton"><Border Background="Transparent"/></ControlTemplate></RepeatButton.Template></RepeatButton></Track.DecreaseRepeatButton>
+                    <Track.Thumb><Thumb><Thumb.Template><ControlTemplate TargetType="Thumb"><Border Background="#B0A5B1BD" CornerRadius="4" Margin="2,0"/></ControlTemplate></Thumb.Template></Thumb></Track.Thumb>
+                    <Track.IncreaseRepeatButton><RepeatButton Command="ScrollBar.PageDownCommand" Focusable="False"><RepeatButton.Template><ControlTemplate TargetType="RepeatButton"><Border Background="Transparent"/></ControlTemplate></RepeatButton.Template></RepeatButton></Track.IncreaseRepeatButton>
+                </Track>
+            </ControlTemplate></Setter.Value></Setter>
+        </Style>
+        <Style x:Key="Keycap" TargetType="Border">
+            <Setter Property="Background" Value="#24FFFFFF"/><Setter Property="BorderBrush" Value="#60FFFFFF"/>
+            <Setter Property="BorderThickness" Value="1,1,1,2"/><Setter Property="CornerRadius" Value="6"/><Setter Property="Padding" Value="10,5"/>
+        </Style>
+        <Style TargetType="Expander">
+            <Setter Property="Foreground" Value="{StaticResource Text}"/>
+            <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="Expander">
+                <StackPanel>
+                    <ToggleButton x:Name="Header" IsChecked="{Binding IsExpanded, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}" HorizontalContentAlignment="Stretch" Cursor="Hand" AutomationProperties.Name="Atalhos e processamento">
+                        <ToggleButton.Template><ControlTemplate TargetType="ToggleButton">
+                            <Border x:Name="HeaderSurface" BorderBrush="{StaticResource Edge}" BorderThickness="1" CornerRadius="8" Padding="14,12" Background="Transparent">
+                                <DockPanel><ContentControl x:Name="Chevron" Style="{StaticResource MxIcon}" Content="{StaticResource MxDropdown}" Foreground="{StaticResource Muted}" DockPanel.Dock="Right" Width="16" Height="16"/><ContentPresenter Content="{Binding Header, RelativeSource={RelativeSource AncestorType=Expander}}" VerticalAlignment="Center"/></DockPanel>
+                            </Border>
+                            <ControlTemplate.Triggers><Trigger Property="IsMouseOver" Value="True"><Setter TargetName="HeaderSurface" Property="Background" Value="#0FFFFFFF"/></Trigger><Trigger Property="IsKeyboardFocused" Value="True"><Setter TargetName="HeaderSurface" Property="BorderBrush" Value="{StaticResource Focus}"/></Trigger><Trigger Property="IsChecked" Value="True"><Setter TargetName="Chevron" Property="LayoutTransform"><Setter.Value><RotateTransform Angle="180"/></Setter.Value></Setter></Trigger></ControlTemplate.Triggers>
+                        </ControlTemplate></ToggleButton.Template>
+                    </ToggleButton>
+                    <ContentPresenter x:Name="Details" ContentSource="Content" Visibility="Collapsed" Margin="0,14,0,0"/>
+                </StackPanel>
+                <ControlTemplate.Triggers><Trigger Property="IsExpanded" Value="True"><Setter TargetName="Details" Property="Visibility" Value="Visible"/></Trigger></ControlTemplate.Triggers>
+            </ControlTemplate></Setter.Value></Setter>
+        </Style>
+        <DataTemplate x:Key="TranscriptRow">
+            <Border Style="{StaticResource Panel}" Margin="0,0,0,12" Padding="20,16">
+                <Grid><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+                    <DockPanel Margin="0,0,0,10">
+                        <Button DockPanel.Dock="Right" Style="{StaticResource QuietButton}" Click="CopyTranscript" Tag="{Binding}" IsEnabled="{Binding CanCopy, RelativeSource={RelativeSource AncestorType=Window}}" AutomationProperties.Name="Copiar esta transcrição" ToolTip="Copiar para a área de transferência"><StackPanel Orientation="Horizontal"><ContentControl Style="{StaticResource MxIcon}" Content="{StaticResource MxCopy}" Width="16" Height="16" Margin="0,0,8,0"/><TextBlock Text="Copiar"/></StackPanel></Button>
+                        <TextBlock Text="{Binding Time, StringFormat={}{0:dd/MM · HH:mm}}" Foreground="{StaticResource Muted}" FontSize="12" VerticalAlignment="Center"/>
+                    </DockPanel>
+                    <TextBlock Grid.Row="1" Text="{Binding Text}" TextWrapping="Wrap" LineHeight="23"/>
+                </Grid>
+            </Border>
+        </DataTemplate>
+        </ResourceDictionary>
+    </Window.Resources>
+    <Border BorderBrush="#40FFFFFF" BorderThickness="1" CornerRadius="11" ClipToBounds="True">
+        <Grid x:Name="Root" ClipToBounds="True" SizeChanged="AdaptDensity">
+            <Grid.Background><LinearGradientBrush StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#333B45" Offset="0"/><GradientStop Color="#282F39" Offset="0.55"/><GradientStop Color="#232A33" Offset="1"/></LinearGradientBrush></Grid.Background>
+            <Canvas IsHitTestVisible="False">
+                <Ellipse Width="540" Height="540" Canvas.Left="740" Canvas.Top="-250" Fill="#12315EFB"><Ellipse.Effect><BlurEffect Radius="110"/></Ellipse.Effect></Ellipse>
+            </Canvas>
+            <Grid>
+                <Grid.ColumnDefinitions><ColumnDefinition Width="194"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                <Grid.RowDefinitions><RowDefinition Height="52"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+                <Border Grid.RowSpan="2" Background="#36202730" BorderBrush="{StaticResource Edge}" BorderThickness="0,0,1,0">
+                    <Grid Margin="12,0,12,20"><Grid.RowDefinitions><RowDefinition Height="82"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+                        <Image Source="{StaticResource BrandLogoWhite}" Width="150" Height="44" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="8,0,0,0" AutomationProperties.Name="HoldTalk"/>
+                        <StackPanel Grid.Row="1">
+                            <RadioButton x:Name="HomeNav" Style="{StaticResource Nav}" GroupName="Pages" Tag="home" Checked="Navigate" IsChecked="True"><StackPanel Orientation="Horizontal"><ContentControl Style="{StaticResource MxIcon}" Content="{StaticResource MxHome}" Margin="0,0,13,0"/><TextBlock Text="Início" VerticalAlignment="Center"/></StackPanel></RadioButton>
+                            <RadioButton x:Name="HistoryNav" Style="{StaticResource Nav}" GroupName="Pages" Tag="history" Checked="Navigate"><StackPanel Orientation="Horizontal"><ContentControl Style="{StaticResource MxIcon}" Content="{StaticResource MxHistory}" Margin="0,0,13,0"/><TextBlock Text="Histórico" VerticalAlignment="Center"/></StackPanel></RadioButton>
+                            <RadioButton x:Name="SettingsNav" Style="{StaticResource Nav}" GroupName="Pages" Tag="settings" Checked="Navigate"><StackPanel Orientation="Horizontal"><ContentControl Style="{StaticResource MxIcon}" Content="{StaticResource MxSettings}" Margin="0,0,13,0"/><TextBlock Text="Configurações" VerticalAlignment="Center"/></StackPanel></RadioButton>
+                        </StackPanel>
+                        <StackPanel Grid.Row="2" Margin="12,0">
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,8"><Ellipse Fill="{StaticResource Ready}" Width="6" Height="6" Margin="0,0,8,0"/><TextBlock Text="Ditado local" FontSize="12" Foreground="#D1DDD5"/></StackPanel>
+                            <TextBlock Text="Sua voz fica neste PC." Foreground="{StaticResource Muted}" FontSize="11"/>
+                            <TextBlock Text="Cohere · Windows" Foreground="{StaticResource Muted}" FontSize="11" Margin="0,6,0,0"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+                <Border Grid.Column="1" BorderBrush="#25FFFFFF" BorderThickness="0,0,0,1" Background="#0BFFFFFF">
+                    <Grid Margin="18,0,0,0"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                        <Button x:Name="HeaderMicrophoneButton" Style="{StaticResource QuietButton}" Click="ConfigureMicrophone" AutomationProperties.Name="Configurar microfone" ToolTip="Configurar microfone" HorizontalContentAlignment="Stretch" BorderBrush="Transparent" VerticalAlignment="Center" Margin="0,0,12,0" shell:WindowChrome.IsHitTestVisibleInChrome="True">
+                            <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><ContentControl Style="{StaticResource MxIcon}" Content="{StaticResource MxMicrophone}" Foreground="{StaticResource Muted}" Width="16" Height="16" Margin="0,0,9,0"/><TextBlock Grid.Column="1" x:Name="HeaderMicrophone" Text="Conectando microfone…" Foreground="{StaticResource Muted}" FontSize="12" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/><ContentControl Grid.Column="2" Style="{StaticResource MxIcon}" Content="{StaticResource MxDropdown}" Width="12" Height="12" Margin="10,0,0,0" Foreground="{StaticResource Muted}"/></Grid>
+                        </Button>
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" shell:WindowChrome.IsHitTestVisibleInChrome="True">
+                            <Button Style="{StaticResource Caption}" Click="MinimizeWindow" AutomationProperties.Name="Minimizar janela"><ContentControl Style="{StaticResource MxIcon}" Content="{StaticResource MxMinimize}" Width="16" Height="16"/></Button>
+                            <Button Style="{StaticResource Caption}" Click="MaximizeWindow" AutomationProperties.Name="Maximizar ou restaurar janela"><ContentControl Style="{StaticResource MxIcon}" Content="{StaticResource MxMaximize}" Width="16" Height="16"/></Button>
+                            <Button Style="{StaticResource Caption}" Click="HideWindow" AutomationProperties.Name="Fechar janela e manter na bandeja"><ContentControl Style="{StaticResource MxIcon}" Content="{StaticResource MxClose}" Width="16" Height="16"/></Button>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+                <Grid Grid.Row="1" Grid.Column="1" Margin="28,24,28,18">
+                    <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+                    <Border x:Name="Notice" Grid.Row="0" Visibility="Collapsed" Background="#263E34" BorderBrush="{StaticResource Ready}" BorderThickness="1" CornerRadius="9" Padding="14,10" Margin="0,0,0,14">
+                        <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><TextBlock x:Name="NoticeText" TextWrapping="Wrap" Foreground="#D7FFE9" VerticalAlignment="Center" Margin="0,0,12,0"/><Button Grid.Column="1" x:Name="DismissNoticeButton" Style="{StaticResource QuietButton}" Click="DismissNotice" Padding="6" Width="32" MinHeight="32" AutomationProperties.Name="Dispensar mensagem"><ContentControl Style="{StaticResource MxIcon}" Content="{StaticResource MxClose}" Width="16" Height="16"/></Button></Grid>
+                    </Border>
+                    <ScrollViewer x:Name="HomePage" Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="0,0,5,0">
+                        <StackPanel>
+                            <StackPanel x:Name="HomeIntroduction"><TextBlock Text="Um espaço para sua voz." FontSize="24" FontWeight="SemiBold"/>
+                            <TextBlock Text="Fale naturalmente. O HoldTalk cuida do texto." Style="{StaticResource QuietText}" Margin="0,6,0,20"/></StackPanel>
+                            <Border Style="{StaticResource Panel}" Padding="22,20">
+                                <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                                <StackPanel Margin="0,0,16,0">
+                                    <Border x:Name="StatusPill" Background="#1AACFFD5" CornerRadius="12" Padding="10,4" HorizontalAlignment="Left">
+                                        <StackPanel Orientation="Horizontal"><Ellipse x:Name="StatusDot" Fill="{StaticResource Ready}" Width="6" Height="6" Margin="0,0,8,0"/><TextBlock x:Name="StatusLabel" Text="Preparando" FontSize="12"/></StackPanel>
+                                    </Border>
+                                    <TextBlock x:Name="StatusHeadline" Text="Pronto quando você estiver." FontSize="22" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,12,0,0"/>
+                                    <TextBlock x:Name="StatusHint" Text="Segure o atalho, fale e solte para transcrever." Style="{StaticResource QuietText}" Margin="0,6,0,0"/>
+                                    <Grid Height="18"><ProgressBar x:Name="WorkProgress" IsIndeterminate="True" Visibility="Collapsed" Height="3" Foreground="{StaticResource Focus}" Background="#20FFFFFF" VerticalAlignment="Center"/></Grid>
+                                    <StackPanel Orientation="Horizontal"><Border Style="{StaticResource Keycap}"><TextBlock x:Name="DictationKey" Text="Ctrl direito" FontWeight="SemiBold"/></Border><TextBlock Text=" para ditar" Foreground="{StaticResource Muted}" VerticalAlignment="Center" Margin="8,0,0,0"/></StackPanel>
+                                </StackPanel>
+                                <Border Grid.Column="1" x:Name="MicrophoneOrb" CornerRadius="28" Width="56" Height="56" Background="#20315EFB" BorderBrush="{StaticResource Focus}" BorderThickness="1" VerticalAlignment="Top" Margin="0,2,0,0">
+                                    <ContentControl Style="{StaticResource MxIcon}" x:Name="StateIcon" Content="{StaticResource MxMicrophone}" Foreground="{StaticResource Focus}" Width="28" Height="28"/>
+                                </Border>
+                                </Grid>
+                            </Border>
+                            <Border BorderBrush="{StaticResource Edge}" BorderThickness="0,0,0,1" Padding="0,18,0,20" Margin="0,0,0,20">
+                                <Grid><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="1.25*"/><ColumnDefinition/></Grid.ColumnDefinitions>
+                                    <StackPanel><TextBlock Text="Idioma" Style="{StaticResource QuietText}" FontSize="12"/><TextBlock x:Name="LanguageSummary" FontWeight="SemiBold" Margin="0,4,0,0"/></StackPanel>
+                                    <StackPanel Grid.Column="1" Margin="12,0"><TextBlock Text="Modelo" Style="{StaticResource QuietText}" FontSize="12"/><TextBlock x:Name="ModelSummary" FontWeight="SemiBold" Margin="0,4,0,0" TextTrimming="CharacterEllipsis" ToolTip="{Binding Text, RelativeSource={RelativeSource Self}}"/></StackPanel>
+                                    <StackPanel Grid.Column="2"><TextBlock Text="Limpeza opcional" Style="{StaticResource QuietText}" FontSize="12"/><TextBlock x:Name="CleanupKey" Text="F8" FontWeight="SemiBold" Margin="0,4,0,0"/></StackPanel>
+                                </Grid>
+                            </Border>
+                            <DockPanel Margin="0,0,0,12"><Button Content="Ver histórico" DockPanel.Dock="Right" Click="ShowHistory" Style="{StaticResource QuietButton}"/><TextBlock Text="Última transcrição" FontWeight="SemiBold" FontSize="17" VerticalAlignment="Center"/></DockPanel>
+                            <TextBlock x:Name="HomeEmpty" Text="Seu primeiro ditado aparece aqui. Abra um campo de texto e use o atalho para começar." Style="{StaticResource QuietText}" Margin="0,5,0,15"/>
+                            <ItemsControl x:Name="LatestList" ItemTemplate="{StaticResource TranscriptRow}"/>
+                        </StackPanel>
+                    </ScrollViewer>
+                    <Grid x:Name="HistoryPage" Grid.Row="1" Visibility="Collapsed">
+                        <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+                        <StackPanel><TextBlock Text="Suas palavras, guardadas." FontSize="24" FontWeight="SemiBold"/><TextBlock Text="As últimas 10 transcrições. O arquivo completo fica no seu PC." Style="{StaticResource QuietText}" Margin="0,6,0,20"/></StackPanel>
+                        <Grid Grid.Row="1" Margin="0,0,0,12">
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                            <TextBox x:Name="HistorySearch" Padding="12,10,44,10" TextChanged="SearchHistory" AutomationProperties.Name="Buscar nas transcrições" ToolTip="Buscar nas transcrições"/>
+                            <TextBlock Text="Buscar transcrições" Margin="13,0,0,0" VerticalAlignment="Center" Foreground="{StaticResource Muted}" IsHitTestVisible="False"><TextBlock.Style><Style TargetType="TextBlock"><Setter Property="Visibility" Value="Collapsed"/><Style.Triggers><DataTrigger Binding="{Binding Text.Length, ElementName=HistorySearch}" Value="0"><Setter Property="Visibility" Value="Visible"/></DataTrigger></Style.Triggers></Style></TextBlock.Style></TextBlock>
+                            <Button x:Name="ClearSearchButton" Click="ClearHistorySearch" HorizontalAlignment="Right" VerticalAlignment="Center" Width="32" MinHeight="32" Padding="6" Margin="0,0,5,0" BorderBrush="Transparent" AutomationProperties.Name="Limpar busca" ToolTip="Limpar busca">
+                                <Button.Style><Style TargetType="Button" BasedOn="{StaticResource QuietButton}"><Style.Triggers><DataTrigger Binding="{Binding Text.Length, ElementName=HistorySearch}" Value="0"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></Button.Style>
+                                <ContentControl Style="{StaticResource MxIcon}" Content="{StaticResource MxClose}" Width="16" Height="16"/>
+                            </Button>
+                            <Button Grid.Column="1" Content="Abrir pasta" Click="OpenArchive" Margin="12,0,0,0" Style="{StaticResource QuietButton}"/>
+                        </Grid>
+                        <TextBlock Grid.Row="2" x:Name="HistoryCount" FontSize="12" Foreground="{StaticResource Muted}" Margin="0,0,0,14"/>
+                        <ScrollViewer Grid.Row="3" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="0,0,5,0"><StackPanel><TextBlock x:Name="HistoryEmpty" Style="{StaticResource QuietText}" Margin="0,14,0,0"/><ItemsControl x:Name="HistoryList" ItemTemplate="{StaticResource TranscriptRow}"/></StackPanel></ScrollViewer>
+                    </Grid>
+                    <ScrollViewer x:Name="SettingsPage" Grid.Row="1" Visibility="Collapsed" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="0,0,5,0">
+                        <StackPanel>
+                            <TextBlock Text="Do seu jeito." FontSize="24" FontWeight="SemiBold"/><TextBlock Text="Os ajustes essenciais para um bom ditado." Style="{StaticResource QuietText}" Margin="0,6,0,20"/>
+                            <Border Style="{StaticResource Panel}"><StackPanel>
+                                <TextBlock Text="Entrada de áudio" FontWeight="SemiBold" FontSize="17"/>
+                                <Label Content="Microfone" Target="{Binding ElementName=MicrophoneChoice}" Foreground="{StaticResource Muted}" Padding="0" Margin="0,16,0,8"/>
+                                <ComboBox x:Name="MicrophoneChoice" AutomationProperties.Name="Microfone de gravação"/>
+                                <TextBlock Text="Escolha o microfone em que você realmente fala." Style="{StaticResource QuietText}" FontSize="12" Margin="0,6,0,16"/>
+                                <Label Content="Idioma do ditado" Target="{Binding ElementName=LanguageChoice}" Foreground="{StaticResource Muted}" Padding="0" Margin="0,0,0,8"/>
+                                <ComboBox x:Name="LanguageChoice" AutomationProperties.Name="Idioma do ditado" DisplayMemberPath="Value" SelectedValuePath="Key"/>
+                                <TextBlock Text="Selecione o idioma que você vai falar. Cohere suporta 14 idiomas." Style="{StaticResource QuietText}" FontSize="12" Margin="0,6,0,18"/>
+                                <Button x:Name="SaveSettingsButton" Content="Salvar configurações" Style="{StaticResource Primary}" HorizontalAlignment="Left" Click="SaveSettings"/>
+                            </StackPanel></Border>
+                            <Expander x:Name="ProcessingDetails" Margin="0,18,0,0"><Expander.Header><TextBlock Text="Atalhos e processamento" FontWeight="SemiBold"/></Expander.Header><StackPanel Margin="14,0">
+                                <TextBlock x:Name="ShortcutDetails" Style="{StaticResource QuietText}" Margin="0,0,0,12"/>
+                                <TextBlock x:Name="RuntimeDetails" Style="{StaticResource QuietText}" Margin="0,0,0,12"/>
+                                <TextBlock Text="A limpeza é opcional. Com um provedor configurado, o texto pode ser enviado para ele; o áudio continua local." Style="{StaticResource QuietText}" FontSize="12" Margin="0,0,0,16"/>
+                                <WrapPanel><Button Content="Abrir configuração avançada" Click="OpenConfig" Style="{StaticResource QuietButton}" Margin="0,0,10,10"/><Button Content="Permissões do microfone" Click="OpenPermissions" Style="{StaticResource QuietButton}" Margin="0,0,0,10"/></WrapPanel>
+                            </StackPanel></Expander>
+                            <Button Content="Encerrar HoldTalk" HorizontalAlignment="Left" Click="QuitApp" Style="{StaticResource QuietButton}" Margin="0,20,0,10" Foreground="#FFB4B4"/>
+                        </StackPanel>
+                    </ScrollViewer>
+                    <Grid Grid.Row="2" Margin="0,17,0,0"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                        <TextBlock x:Name="FooterStatus" Text="Preparando o ditado…" Style="{StaticResource QuietText}" FontSize="12" VerticalAlignment="Center" Margin="0,0,16,0"/>
+                        <Button x:Name="PauseButton" Grid.Column="1" Content="Pausar atalhos" Click="PauseHotkeys" Padding="13,7" MinHeight="34" BorderBrush="{StaticResource Edge}"/>
+                    </Grid>
+                </Grid>
+            </Grid>
+        </Grid>
+    </Border>
+</Window>

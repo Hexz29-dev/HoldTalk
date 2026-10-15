@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <DrawingImage x:Key="BrandSymbol">
+    <DrawingImage.Drawing>
+      <DrawingGroup>
+        <DrawingGroup.Children>
+          <GeometryDrawing Brush="#FF315EFB" Pen="{x:Null}">
+            <GeometryDrawing.Geometry>
+              <RectangleGeometry RadiusX="112" RadiusY="112" Rect="32,32,448,448" />
+            </GeometryDrawing.Geometry>
+          </GeometryDrawing>
+          <DrawingGroup>
+            <DrawingGroup.Children>
+              <GeometryDrawing Brush="#FFFFFFFF" Pen="{x:Null}">
+                <GeometryDrawing.Geometry>
+                  <RectangleGeometry RadiusX="26" RadiusY="26" Rect="128,144,52,224" />
+                </GeometryDrawing.Geometry>
+              </GeometryDrawing>
+              <GeometryDrawing Brush="#FFFFFFFF" Pen="{x:Null}">
+                <GeometryDrawing.Geometry>
+                  <RectangleGeometry RadiusX="26" RadiusY="26" Rect="260,144,52,224" />
+                </GeometryDrawing.Geometry>
+              </GeometryDrawing>
+              <GeometryDrawing Brush="#FFFFFFFF" Pen="{x:Null}" Geometry="F1M154,236C179,236 182,216 207,216 242,216 240,256 268,256L286,256 286,296 268,296C220,296 223,256 207,256 190,256 187,276 154,276z" />
+            </DrawingGroup.Children>
+          </DrawingGroup>
+          <GeometryDrawing Brush="#FFACFFD5" Pen="{x:Null}">
+            <GeometryDrawing.Geometry>
+              <RectangleGeometry RadiusX="18" RadiusY="18" Rect="344,224,36,64" />
+            </GeometryDrawing.Geometry>
+          </GeometryDrawing>
+        </DrawingGroup.Children>
+      </DrawingGroup>
+    </DrawingImage.Drawing>
+  </DrawingImage>
+  <DrawingImage x:Key="BrandLogoWhite">
+    <DrawingImage.Drawing>
+      <DrawingGroup>
+        <DrawingGroup.Children>
+          <DrawingGroup>
+            <DrawingGroup.Children>
+              <GeometryDrawing Brush="#FF315EFB" Pen="{x:Null}">
+                <GeometryDrawing.Geometry>
+                  <RectangleGeometry RadiusX="112" RadiusY="112" Rect="32,32,448,448" />
+                </GeometryDrawing.Geometry>
+              </GeometryDrawing>
+              <DrawingGroup>
+                <DrawingGroup.Children>
+                  <GeometryDrawing Brush="#FFFFFFFF" Pen="{x:Null}">
+                    <GeometryDrawing.Geometry>
+                      <RectangleGeometry RadiusX="26" RadiusY="26" Rect="128,144,52,224" />
+                    </GeometryDrawing.Geometry>
+                  </GeometryDrawing>
+                  <GeometryDrawing Brush="#FFFFFFFF" Pen="{x:Null}">
+                    <GeometryDrawing.Geometry>
+                      <RectangleGeometry RadiusX="26" RadiusY="26" Rect="260,144,52,224" />
+                    </GeometryDrawing.Geometry>
+                  </GeometryDrawing>
+                  <GeometryDrawing Brush="#FFFFFFFF" Pen="{x:Null}" Geometry="F1M154,236C179,236 182,216 207,216 242,216 240,256 268,256L286,256 286,296 268,296C220,296 223,256 207,256 190,256 187,276 154,276z" />
+                </DrawingGroup.Children>
+              </DrawingGroup>
+              <GeometryDrawing Brush="#FFACFFD5" Pen="{x:Null}">
+                <GeometryDrawing.Geometry>
+                  <RectangleGeometry RadiusX="18" RadiusY="18" Rect="344,224,36,64" />
+                </GeometryDrawing.Geometry>
+              </GeometryDrawing>
+            </DrawingGroup.Children>
+            <DrawingGroup.Transform>
+              <TransformGroup>
+                <TransformGroup.Children>
+                  <ScaleTransform ScaleX="0.40625" ScaleY="0.40625" />
+                  <TranslateTransform X="24" Y="48" />
+                </TransformGroup.Children>
+              </TransformGroup>
+            </DrawingGroup.Transform>
+          </DrawingGroup>
+          <DrawingGroup>
+            <DrawingGroup.Children>
+              <GeometryDrawing Brush="#FFFFFFFF" Pen="{x:Null}" Geometry="F1M314.756,157.252L314.756,193 330.956,193 330.956,114.268 314.648,114.268 314.648,143.752 283.544,143.752 283.544,114.268 267.344,114.268 267.344,193 283.544,193 283.544,157.252z" />
+              <GeometryDrawing Brush="#FFFFFFFF" Pen="{x:Null}" Geometry="F1M368.384,133.708C350.564,133.708 339.656,145.48 339.656,164.596 339.656,183.82 350.564,195.484 368.492,195.484 386.312,195.484 397.328,183.82 397.328,165.028 397.328,145.264 386.636,133.708 368.384,133.708z M368.492,145.912C376.808,145.912 382.208,153.364 382.208,164.812 382.208,175.72 376.592,183.28 368.492,183.28 360.284,183.28 354.776,175.828 354.776,164.596 354.776,153.364 360.284,145.912 368.492,145.912z" />
+              <GeometryDrawing Brush="#FFFFFFFF" Pen="{x:Null}" Geometry="F1M422.12,114.268L407,114.268 407,193 422.12,193z" />
+              <GeometryDrawing Brush="#FFFFFFFF" Pen="{x:Null}" Geometry="F1M471.428,193L486.548,193 486.548,114.268 471.428,114.268 471.428,142.24C467.648,136.408 462.68,133.708 455.336,133.708 441.404,133.708 430.82,147.1 430.82,164.704 430.82,172.588 433.196,180.58 437.084,186.196 441.08,191.92 448.208,195.484 455.336,195.484 462.68,195.484 467.648,192.892 471.428,187.06z M458.684,146.344C466.352,146.344 471.428,153.688 471.428,164.92 471.428,175.504 466.244,182.848 458.684,182.848 451.124,182.848 445.94,175.396 445.94,164.704 445.94,153.796 451.124,146.344 458.684,146.344z" />
+              <GeometryDrawing Brush="#FFFFFFFF" Pen="{x:Null}" Geometry="F1M533.156,127.768L556.16,127.768 556.16,114.268 493.088,114.268 493.088,127.768 516.956,127.768 516.956,193 533.156,193z" />
+              <GeometryDrawing Brush="#FFFFFFFF" Pen="{x:Null}" Geometry="F1M607.056,191.164C604.464,188.68,603.6,186.952,603.6,184.036L603.6,151.636C603.6,139.756 595.5,133.708 579.732,133.708 563.964,133.708 555.756,140.404 554.784,153.904L569.364,153.904C570.12,147.856 572.604,145.912 580.056,145.912 585.888,145.912 588.804,147.856 588.804,151.744 588.804,153.688 587.832,155.308 586.212,156.28 584.16,157.36 584.16,157.36 576.708,158.548L570.66,159.628C559.104,161.572 553.488,167.512 553.488,177.988 553.488,188.464 560.508,195.484 571.2,195.484 577.68,195.484 583.512,192.784 588.912,187.168 588.912,190.192 589.236,191.272 590.64,193L607.056,193z M588.804,169.564C588.804,178.312 584.484,183.28 576.816,183.28 571.74,183.28 568.608,180.58 568.608,176.26 568.608,171.724 570.984,169.564 577.248,168.268L582.432,167.296C586.428,166.54,587.076,166.324,588.804,165.46z" />
+              <GeometryDrawing Brush="#FFFFFFFF" Pen="{x:Null}" Geometry="F1M630.768,114.268L615.648,114.268 615.648,193 630.768,193z" />
+              <GeometryDrawing Brush="#FFFFFFFF" Pen="{x:Null}" Geometry="F1M657.828,157.36L657.828,114.268 642.708,114.268 642.708,193 657.828,193 657.828,173.884 663.876,167.296 677.808,193 695.52,193 674.244,156.712 694.116,134.68 676.944,134.68z" />
+            </DrawingGroup.Children>
+          </DrawingGroup>
+        </DrawingGroup.Children>
+      </DrawingGroup>
+    </DrawingImage.Drawing>
+  </DrawingImage>
+</ResourceDictionary>

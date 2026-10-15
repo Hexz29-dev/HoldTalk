@@ -1,0 +1,11 @@
+{
+  "name": "holdtalk-icons",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "export": "node export.mjs"
+  },
+  "devDependencies": {
+    "mx-icons": "1.1.2"
+  }
+}

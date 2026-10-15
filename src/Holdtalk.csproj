@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <UseWPF>true</UseWPF>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AssemblyName>Holdtalk</AssemblyName>
+    <ApplicationIcon>Assets/HoldTalk.ico</ApplicationIcon>
+  </PropertyGroup>
+  <ItemGroup>
+    <Using Include="System.IO" />
+    <Using Include="System.Net.Http" />
+    <Resource Include="Assets/HoldTalk.ico" />
+    <None Include="../config.example.json" Link="config.example.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="../.env.example" Link=".env.example" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>
